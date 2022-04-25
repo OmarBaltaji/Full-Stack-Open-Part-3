@@ -22,7 +22,11 @@ const persons = [
       "name": "Mary Poppendieck", 
       "number": "39-23-6423122"
     }
-]
+];
+
+app.get('/api/persons', (req, res) => {
+    res.json(persons);
+});
 
 const PORT = 3001;
 app.listen(PORT, () => {
