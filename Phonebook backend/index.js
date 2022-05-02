@@ -38,10 +38,10 @@ app.get('/api/persons/:id', (req, res) => {
 })
 
 app.delete('/api/persons/:id', (req, res) => {
-    const id = Number(req.params.id);
-    persons = persons.filter(person => person.id !== id);
-
-    res.status(204).end();
+    Person.deleteOne({id: req.params.id}).then(result => {
+        console.log(`Person with id ${req.params.id} deleted`);
+        res.status(204).end();
+    });
 });
 
 app.post('/api/persons', (req, res) => {
@@ -55,20 +55,20 @@ app.post('/api/persons', (req, res) => {
         return res.status(400).json({error: 'number is missing'});
     }
 
-    const foundPerson = persons.find(person => person.name === body.name);
-    if(foundPerson) {
-        return res.status(409).json({error: 'name must be unique'});
-    }
-
-    const person = {
-        id:  Math.floor(Math.random() * 999999999),
-        name: body.name,
-        number: body.number
-    }
-
-    persons = persons.concat(person);
-
-    res.json(person);
+    Person.findOne({name: body.name}).then(result => {
+        if(result) {
+            res.status(409).json({error: 'name must be unique'});
+        } else {
+            const person = new Person({
+                name: body.name,
+                number: body.number
+            });
+        
+            person.save().then(savedPerson => {
+                res.json(savedPerson);
+            });
+        }
+    });
 });
 
 const PORT = process.env.PORT;
